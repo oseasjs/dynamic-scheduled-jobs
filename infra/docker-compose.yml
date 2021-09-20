@@ -1,0 +1,49 @@
+version : '3'
+
+services:
+
+    redis:
+        container_name: redis
+        hostname: redis
+        image: redis:alpine
+        ports:
+          - "16379:6379"
+        environment:
+          - DOCKER_HOST=host.docker.internal
+
+    redis-commander:
+      container_name: redis-commander
+      hostname: redis-commander
+      image: rediscommander/redis-commander
+      restart: always
+      environment:
+        - REDIS_HOSTS=local:redis:6379
+        - DOCKER_HOST=host.docker.internal
+      ports:
+        - "16380:8081"
+      depends_on:
+        - redis
+
+    postgres:
+      container_name: postgres
+      hostname: postgres
+      image: postgres
+      restart: unless-stopped
+      environment:
+        - POSTGRES_USER=admin
+        - POSTGRES_PASSWORD=admin
+        - POSTGRES_DB=postgres
+        - DOCKER_HOST=host.docker.internal
+      ports:
+        - "15432:5432"
+
+    # NOTE: the code commented below require existing project docker image on local docker repository
+    # app-instance:
+    #   image: dynamic-scheduled-jobs
+    #   ports:
+    #     - "3000"
+    #   environment:
+    #     - DOCKER_HOST=host.docker.internal
+    #   depends_on:
+    #     - postgres
+    #     - redis
